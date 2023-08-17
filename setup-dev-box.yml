@@ -1,0 +1,17 @@
+---
+- name: Play book to setup development box
+  hosts: all
+  become: true
+  tasks:
+    - name: Ensure system has been updated
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: true
+        autoclean: true
+    - name: Ensure packages are installed
+      ansible.builtin.apt:
+        name:
+          - curl
+          - vim
+          - git
+        state: present
