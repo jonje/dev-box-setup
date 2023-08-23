@@ -1,17 +1,38 @@
 ---
 - name: Play book to setup development box
   hosts: all
-  become: true
   tasks:
     - name: Ensure system has been updated
+      become: true
       ansible.builtin.apt:
         upgrade: dist
         update_cache: true
         autoclean: true
+
     - name: Ensure packages are installed
+      become: true
       ansible.builtin.apt:
         name:
           - curl
           - vim
           - git
+          - terminator
+          - zsh
         state: present
+
+    - name: Register current shell
+      ansible.builtin.shell: echo $SHELL
+      register: current_shell
+      changed_when: false
+
+    - name: Register current user
+      ansible.builtin.command: whoami
+      register: current_user
+      changed_when: false
+
+    - name: Make zsh the default shell
+      become: true
+      ansible.builtin.shell: "chsh -s $(which zsh) {{ current_user.stdout }}"
+      register: result
+      when: current_shell.stdout.find("zsh") == -1
+      changed_when: result.rc != 0
